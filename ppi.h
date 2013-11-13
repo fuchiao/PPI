@@ -2,7 +2,12 @@
 #define PPI_H
 
 #include <QWidget>
-
+#include <QPainter>
+#include <QtMath>
+#include <QDebug>
+#include <QFile>
+#include <QTimer>
+#include <QTime>
 namespace Ui {
 class ppi;
 }
@@ -15,9 +20,15 @@ public:
     explicit ppi(QWidget *parent = 0);
     ~ppi();
     void paintEvent(QPaintEvent *);
-
-    quint8 frame[256][512]; //angle, distance
+#define ANGLE_MAX 128
+#define RADIUS_MAX 256
+    quint8 frame[ANGLE_MAX][RADIUS_MAX]; //angle, radius
     QColor color[256];
+#define DIAMETER 800
+    QPoint points[ANGLE_MAX][RADIUS_MAX];
+    QPoint center;
+    int radiusScale[5];
+    QPoint angleScale[12];
 
 private slots:
     void updateFrame();
