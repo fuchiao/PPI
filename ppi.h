@@ -15,10 +15,12 @@ public:
     explicit ppi(QWidget *parent = 0);
     ~ppi();
     void paintEvent(QPaintEvent *);
-    void appendData(int data);
 
-    QList<qreal> xList;
+    quint8 frame[256][512]; //angle, distance
     QColor color[256];
+
+private slots:
+    void updateFrame();
 
 private:
     Ui::ppi *ui;
