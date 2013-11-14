@@ -47,7 +47,7 @@ ppi::ppi(QWidget *parent) :
     this->index = 0;
     QTimer *timer_input = new QTimer(this);
     connect(timer_input, SIGNAL(timeout()), this, SLOT(updateFrame()));
-    timer_input->start(1);
+    timer_input->start(0.1);
 }
 
 ppi::~ppi()
@@ -81,29 +81,24 @@ void ppi::updateFrame()
 
 void ppi::paintEvent(QPaintEvent *)
 {
+    QElapsedTimer timer;
+    timer.start();
+
     QPainter painter(this);
 
     int j = this->index;
-//    for (int j = 0; j < ANGLE_MAX; j++)
-//    {
-        for (int i = 0; i < RADIUS_MAX-1; i++)
+    for (int i = 0; i < RADIUS_MAX-1; i++)
+    {
+        painter.setPen(QPen(this->color[this->frame[j][i]], 2));
+        if (j+1 == ANGLE_MAX)
         {
-            painter.setPen(QPen(this->color[this->frame[j][i]], 2));
-            //painter.setBrush(QBrush(this->color[this->frame[j][i]]));
-            if (j+1 == ANGLE_MAX)
-            {
-                //QPoint tmp[4] = {this->points[j][i], this->points[j][i+1], this->points[0][i+1], this->points[0][i]};
-                //painter.drawPolygon(tmp, 4);
-                painter.drawLine(this->points[j][i], this->points[0][i]);
-            }
-            else
-            {
-                //QPoint tmp[4] = {this->points[j][i], this->points[j][i+1], this->points[j+1][i+1], this->points[j+1][i]};
-                //painter.drawPolygon(tmp, 4);
-                painter.drawLine(this->points[j][i], this->points[j+1][i]);
-            }
+            painter.drawLine(this->points[j][i], this->points[0][i]);
         }
-//    }
+        else
+        {
+            painter.drawLine(this->points[j][i], this->points[j+1][i]);
+        }
+    }
 
     painter.setBrush(QBrush(Qt::transparent));
     painter.setPen(QPen(Qt::green, 4));
@@ -116,4 +111,6 @@ void ppi::paintEvent(QPaintEvent *)
     for (int i = 0; i < 6; i++) {
         painter.drawLine(this->angleScale[i*2], this->angleScale[i*2+1]);
     }
+
+    qDebug() << "The slow operation took" << timer.nsecsElapsed() << "nanoseconds";
 }
