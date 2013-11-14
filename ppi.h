@@ -20,8 +20,8 @@ public:
     explicit ppi(QWidget *parent = 0);
     ~ppi();
     void paintEvent(QPaintEvent *);
-#define ANGLE_MAX 128
-#define RADIUS_MAX 256
+#define ANGLE_MAX 256
+#define RADIUS_MAX 512
     quint8 frame[ANGLE_MAX][RADIUS_MAX]; //angle, radius
     QColor color[256];
 #define DIAMETER 800
@@ -29,6 +29,7 @@ public:
     QPoint center;
     int radiusScale[5];
     QPoint angleScale[12];
+    int index;
 
 private slots:
     void updateFrame();

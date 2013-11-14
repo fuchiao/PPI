@@ -44,9 +44,10 @@ ppi::ppi(QWidget *parent) :
         color[i].setRgb(static_cast<quint8>(bytes[i*3]), static_cast<quint8>(bytes[i*3+1]), static_cast<quint8>(bytes[i*3+2]));
 
     //init Timer
+    this->index = 0;
     QTimer *timer_input = new QTimer(this);
     connect(timer_input, SIGNAL(timeout()), this, SLOT(updateFrame()));
-    timer_input->start(3);
+    timer_input->start(1);
 }
 
 ppi::~ppi()
@@ -63,19 +64,18 @@ void ppi::updateFrame()
         i = 0;
     for (int j=0; j<RADIUS_MAX-1; j++)
         this->frame[i][j] = qrand() % 256;
-    /*
+
     QPolygon poly(3);
     poly[0] = this->center;
-    poly[1] = this->points[i][RADIUS_MAX];
+    poly[1] = this->points[i][RADIUS_MAX-1];
     if (i+1==ANGLE_MAX)
-        poly[2] = this->points[0][RADIUS_MAX];
+        poly[2] = this->points[0][RADIUS_MAX-1];
     else
-        poly[2] = this->points[i+1][RADIUS_MAX];
-    poly[1] = QPoint(300, 500);
-    poly[2] = QPoint(700, 700);
-    QRegion r(poly);
-    */
-    if (i % 20 == 0) this->update();
+        poly[2] = this->points[i+1][RADIUS_MAX-1];
+
+    this->index = i;
+    this->repaint(poly);
+    //this->update();
     qDebug()<<"Update "<<i++;
 }
 
@@ -83,25 +83,28 @@ void ppi::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-
-    for (int j = 0; j < ANGLE_MAX; j++)
-    {
+    int j = this->index;
+//    for (int j = 0; j < ANGLE_MAX; j++)
+//    {
         for (int i = 0; i < RADIUS_MAX-1; i++)
         {
-            painter.setPen(QPen(this->color[this->frame[j][i]], 1));
-            painter.setBrush(QBrush(this->color[this->frame[j][i]]));
+            painter.setPen(QPen(this->color[this->frame[j][i]], 2));
+            //painter.setBrush(QBrush(this->color[this->frame[j][i]]));
             if (j+1 == ANGLE_MAX)
             {
-                QPoint tmp[4] = {this->points[j][i], this->points[j][i+1], this->points[0][i+1], this->points[0][i]};
-                painter.drawPolygon(tmp, 4);
+                //QPoint tmp[4] = {this->points[j][i], this->points[j][i+1], this->points[0][i+1], this->points[0][i]};
+                //painter.drawPolygon(tmp, 4);
+                painter.drawLine(this->points[j][i], this->points[0][i]);
             }
             else
             {
-                QPoint tmp[4] = {this->points[j][i], this->points[j][i+1], this->points[j+1][i+1], this->points[j+1][i]};
-                painter.drawPolygon(tmp, 4);
+                //QPoint tmp[4] = {this->points[j][i], this->points[j][i+1], this->points[j+1][i+1], this->points[j+1][i]};
+                //painter.drawPolygon(tmp, 4);
+                painter.drawLine(this->points[j][i], this->points[j+1][i]);
             }
         }
-    }
+//    }
+
     painter.setBrush(QBrush(Qt::transparent));
     painter.setPen(QPen(Qt::green, 4));
     painter.drawEllipse(this->center, this->radiusScale[0], this->radiusScale[0]);
