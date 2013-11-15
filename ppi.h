@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QTime>
 #include <QElapsedTimer>
+#include <QList>
 namespace Ui {
 class ppi;
 }
@@ -21,12 +22,12 @@ public:
     explicit ppi(QWidget *parent = 0);
     ~ppi();
     void paintEvent(QPaintEvent *);
-#define ANGLE_MAX 512
+#define ANGLE_MAX 1024
 #define RADIUS_MAX 512
-    quint8 frame[ANGLE_MAX][RADIUS_MAX]; //angle, radius
+    quint8 buffer[RADIUS_MAX];
     QColor color[256];
 #define DIAMETER 800
-    QPoint points[ANGLE_MAX][RADIUS_MAX];
+    QList<QList<QPoint> > points;
     QPoint center;
     int radiusScale[5];
     QPoint angleScale[12];

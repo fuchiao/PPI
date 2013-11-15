@@ -28,11 +28,15 @@ ppi::ppi(QWidget *parent) :
     //init Points
     for (int j = 0; j < ANGLE_MAX; j++)
     {
+        QList<QPoint> tmpList;
         for (int i = 1; i <= RADIUS_MAX; i++)
         {
-            this->points[j][i-1].setX(DIAMETER/2+DIAMETER/2*i/RADIUS_MAX*qSin(2*j*M_PI/ANGLE_MAX));
-            this->points[j][i-1].setY(DIAMETER/2-DIAMETER/2*i/RADIUS_MAX*qCos(2*j*M_PI/ANGLE_MAX));
+            QPoint tmp;
+            tmp.setX(DIAMETER/2+DIAMETER/2*i/RADIUS_MAX*qSin(2*j*M_PI/ANGLE_MAX));
+            tmp.setY(DIAMETER/2-DIAMETER/2*i/RADIUS_MAX*qCos(2*j*M_PI/ANGLE_MAX));
+            tmpList.append(tmp);
         }
+        this->points.append(tmpList);
     }
 
     //init Colormap
@@ -47,7 +51,7 @@ ppi::ppi(QWidget *parent) :
     this->index = 0;
     QTimer *timer_input = new QTimer(this);
     connect(timer_input, SIGNAL(timeout()), this, SLOT(updateFrame()));
-    timer_input->start(0.1);
+    timer_input->start(0.01);
 }
 
 ppi::~ppi()
@@ -57,26 +61,20 @@ ppi::~ppi()
 
 void ppi::updateFrame()
 {
-    static int i = 0;
+    //Create Random Data for Display
     QTime time = QTime::currentTime();
-    qsrand((uint)time.msec()+i);
-    if (i>=ANGLE_MAX)
-        i = 0;
-    for (int j=0; j<RADIUS_MAX-1; j++)
-        this->frame[i][j] = qrand() % 256;
+    qsrand((uint)time.msec() + this->index);
+    for (int j = 0; j < RADIUS_MAX - 1; j++)
+        this->buffer[j] = qrand() % 256;
+    qDebug()<<"Update "<<this->index;
 
+    //Set Update Area
     QPolygon poly(3);
     poly[0] = this->center;
-    poly[1] = this->points[i][RADIUS_MAX-1];
-    if (i+1==ANGLE_MAX)
-        poly[2] = this->points[0][RADIUS_MAX-1];
-    else
-        poly[2] = this->points[i+1][RADIUS_MAX-1];
-
-    this->index = i;
+    poly[1] = this->points[this->index][RADIUS_MAX-1];
+    this->index = (this->index + 1 == ANGLE_MAX)? 0 : this->index + 1;
+    poly[2] = this->points[this->index][RADIUS_MAX-1];
     this->repaint(poly);
-    //this->update();
-    qDebug()<<"Update "<<i++;
 }
 
 void ppi::paintEvent(QPaintEvent *)
@@ -86,18 +84,11 @@ void ppi::paintEvent(QPaintEvent *)
 
     QPainter painter(this);
 
-    int j = this->index;
+    int tmpAngle = (this->index == 0)? ANGLE_MAX-1: this->index-1;
     for (int i = 0; i < RADIUS_MAX-1; i++)
     {
-        painter.setPen(QPen(this->color[this->frame[j][i]], 2));
-        if (j+1 == ANGLE_MAX)
-        {
-            painter.drawLine(this->points[j][i], this->points[0][i]);
-        }
-        else
-        {
-            painter.drawLine(this->points[j][i], this->points[j+1][i]);
-        }
+        painter.setPen(QPen(this->color[this->buffer[i]], 2));
+        painter.drawLine(this->points[this->index][i], this->points[tmpAngle][i]);
     }
 
     painter.setBrush(QBrush(Qt::transparent));
